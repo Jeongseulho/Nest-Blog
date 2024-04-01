@@ -1,7 +1,8 @@
 import { BoardStatusValue } from './board.model';
-import { BaseEntity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { BaseEntity, PrimaryGeneratedColumn, Column, Entity } from 'typeorm';
 
-export class Board extends BaseEntity {
+@Entity()
+export class BoardEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
