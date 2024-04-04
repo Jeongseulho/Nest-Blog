@@ -10,7 +10,7 @@ export class BoardsService {
     return this.boardRepository.createBoard(createBoardDto);
   }
 
-  getBoardById(id: number) {
-    return this.boardRepository.getBoardById(id);
+  deleteBoard(id: number) {
+    return this.boardRepository.deleteBoard(id);
   }
 }

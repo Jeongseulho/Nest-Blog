@@ -1,14 +1,14 @@
 import { DataSource, Repository } from 'typeorm';
-import { BoardEntity } from './board.entity';
+import { Board } from './board.entity';
 import { Injectable } from '@nestjs/common';
 import { createBoardDto } from './dto/create-board.dto';
 import { BoardStatus } from './board.model';
 import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
-export class BoardRepository extends Repository<BoardEntity> {
+export class BoardRepository extends Repository<Board> {
   constructor(private readonly dataSource: DataSource) {
-    super(BoardEntity, dataSource.createEntityManager());
+    super(Board, dataSource.createEntityManager());
   }
 
   async createBoard(createBoardDto: createBoardDto) {
@@ -24,13 +24,11 @@ export class BoardRepository extends Repository<BoardEntity> {
     return board;
   }
 
-  async getBoardById(id: number) {
-    const found = await this.findOne({
-      where: { id },
-    });
-    if (!found) {
+  async deleteBoard(id: number) {
+    const result = await this.delete(id);
+
+    if (result.affected === 0) {
       throw new NotFoundException(`Board with ID "${id}" not found`);
     }
-    return found;
   }
 }
