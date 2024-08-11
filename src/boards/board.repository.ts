@@ -2,8 +2,13 @@ import { DataSource, Repository } from 'typeorm';
 import { Board } from './board.entity';
 import { createBoardDto } from './dto/create-board.dto';
 import { BoardStatus } from './board.model';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { BoardStatusValue } from './board.model';
+import { User } from 'src/auth/user.entity';
 
 @Injectable()
 export class BoardRepository extends Repository<Board> {
@@ -19,24 +24,34 @@ export class BoardRepository extends Repository<Board> {
     return board;
   }
 
-  async createBoard(createBoardDto: createBoardDto) {
+  async createBoard(createBoardDto: createBoardDto, user: User) {
     const { title, description } = createBoardDto;
 
     const board = this.create({
       title,
       description,
       status: BoardStatus.PUBLIC,
+      user,
     });
 
     await this.save(board);
     return board;
   }
 
-  async deleteBoard(id: number) {
-    const result = await this.delete(id);
+  async deleteBoard(id: number, user: User) {
+    const result = await this.delete({ id, user: user });
 
-    if (result.affected === 0)
-      throw new NotFoundException(`Board with ID "${id}" not found`);
+    if (result.affected === 0) {
+      const board = await this.findOne({ where: { id } });
+
+      if (board) {
+        throw new ForbiddenException(
+          `You do not have permission to delete this board`,
+        );
+      } else {
+        throw new NotFoundException(`Board with ID "${id}" not found`);
+      }
+    }
   }
 
   async updateBoardStatus(id: number, status: BoardStatusValue) {
@@ -46,7 +61,12 @@ export class BoardRepository extends Repository<Board> {
     return board;
   }
 
-  async getAllBoards() {
-    return await this.find();
+  async getAllBoards(user: User) {
+    const query = this.createQueryBuilder('board');
+
+    query.where('board.userId = :userId', { userId: user.id });
+    const boards = await query.getMany();
+
+    return boards;
   }
 }

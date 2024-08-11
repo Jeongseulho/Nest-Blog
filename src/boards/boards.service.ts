@@ -2,17 +2,18 @@ import { createBoardDto } from './dto/create-board.dto';
 import { Injectable } from '@nestjs/common';
 import { BoardRepository } from './board.repository';
 import { BoardStatusValue } from './board.model';
+import { User } from 'src/auth/user.entity';
 
 @Injectable()
 export class BoardsService {
   constructor(private readonly boardRepository: BoardRepository) {}
 
-  createBoard(createBoardDto: createBoardDto) {
-    return this.boardRepository.createBoard(createBoardDto);
+  createBoard(createBoardDto: createBoardDto, user: User) {
+    return this.boardRepository.createBoard(createBoardDto, user);
   }
 
-  deleteBoard(id: number) {
-    return this.boardRepository.deleteBoard(id);
+  deleteBoard(id: number, user: User) {
+    return this.boardRepository.deleteBoard(id, user);
   }
 
   getBoard(id: number) {
@@ -23,7 +24,7 @@ export class BoardsService {
     return this.boardRepository.updateBoardStatus(id, status);
   }
 
-  getAllBoards() {
-    return this.boardRepository.getAllBoards();
+  getAllBoards(user: User) {
+    return this.boardRepository.getAllBoards(user);
   }
 }
